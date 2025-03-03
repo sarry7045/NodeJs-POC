@@ -17,4 +17,12 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" })); // for Sapce in 
 app.use(express.static("public"));
 app.use(cookieParser()); // for Access and Set the Cookies of Broswer
 
+
+import userRouter  from "./routes/user.routes.js";
+
+app.use("/api/v1/users", userRouter)
+
+
+
+
 export { app };

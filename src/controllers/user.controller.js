@@ -4,6 +4,24 @@ import { User } from "../models/user.model.js";
 import { uploadOnCludinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "Something went wrong while Generating referesh and access Tokens"
+    );
+  }
+};
+
 const registerUser = asyncHandler(async (req, res) => {
   // res.status(200).json({ message: "ok" });
 
@@ -19,10 +37,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // get user details from frontend
   const { fullName, email, username, password } = req.body;
-  console.log("User Details", fullName, email);
+  // console.log("User Details", fullName, email);
   //
 
-  
   // validation not empty
   // if condition Instead of check like ===, === for all
   if (
@@ -32,7 +49,6 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   //
 
-
   // check if user already exists: username, email
   const existedUser = await User.findOne({
     $or: [{ username }, { email }],
@@ -41,7 +57,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with email or username already exists");
   }
   //
-
 
   // check for images, check for avatar
   const avatarLocalPath = req.files?.avatar[0]?.path;
@@ -59,7 +74,6 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   //
 
-
   // uplaod them to cloudinary, avatar
   const avatar = await uploadOnCludinary(avatarLocalPath);
   const coverImage = await uploadOnCludinary(coverImageLocalPath);
@@ -68,7 +82,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar file is Required");
   }
   //
-
 
   // create user object  - create entry im db
   const user = await User.create({
@@ -90,10 +103,89 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   //
 
-
   return res
     .status(201)
     .json(new ApiResponse(200, createdUser, "User Registered Successfully"));
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  // Take a Req body - data
+  // username or email
+  // find the user
+  // password check
+  // access and refresh token
+  // send cookies
+
+  const { email, username, password } = req.body;
+  if (!email) {
+    throw new ApiError(400, "Username or Password Required");
+  }
+
+  const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+  if (!user) {
+    throw new ApiError(404, "User does not Exist");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password, -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User Logged In Successfully"
+      )
+    );
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: {
+        refreshToken: undefined,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User Logged Out"));
+});
+
+export { registerUser, loginUser, logoutUser };

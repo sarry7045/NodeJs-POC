@@ -1,4 +1,4 @@
-// import connectDB from "./db/index.js";
+import connectDB from "./db/index.js";
 import { app } from "./app.js";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -72,16 +72,17 @@ app.get("/api/getDetails/:city/latitude", async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT}`);
-});
 
-// connectDB()
-//   .then(() => {
-//     app.listen(process.env.PORT || 8000, () => {
-//       console.log(`Server is Running on ${process.env.PORT}`);
-//     });
-//   })
-//   .catch((err) => {
-//     console.log("DB Connection Failed", err);
-//   });
+// app.listen(process.env.PORT, () => {
+//   console.log(`Server is running on http://localhost:${process.env.PORT}`);
+// });
+
+
+connectDB().then(()=>{
+  app.listen(process.env.PORT || 3000, ()=>{
+      console.log(`Server is Running ${process.env.PORT}`);
+  })
+}).catch((err) => {
+  console.log("Mongo Connection Failed", err);
+})
+

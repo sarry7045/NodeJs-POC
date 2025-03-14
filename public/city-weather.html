@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>City Weather</title>
+	<link rel="stylesheet" href="/styles.scss">
+</head>
+
+<body style="margin-left: 500px;">
+	<h1>City Weather</h1>
+	<input type="text" id="cityInput" placeholder="Enter city name">
+	<button onclick="fetchCityWeather()">Get Weather</button>
+	<div id="weather-container" style="margin-left: -400px;"></div>
+	<p style="margin-left: 30px;"><a href="/dashboard">Back to Dashboard</a></p>
+
+	<script>
+		const urlParams = new URLSearchParams(window.location.search);
+		let token = urlParams.get('token') || localStorage.getItem('token');
+		if (!token) {
+			alert('Please login first');
+			window.location.href = '/';
+			throw new Error('No token available');
+		}
+		localStorage.setItem('token', token);
+
+
+		function fetchCityWeather() {
+			const city = document.getElementById('cityInput').value.trim();
+			if (!city) {
+				alert('Please enter a city name');
+				return;
+			}
+
+			fetch(`/api/weather?city=${encodeURIComponent(city)}`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+				.then((res) => {
+					if (res.status === 400 || res.status === 401) {
+						alert('Session expired or invalid token. Please login again.');
+						window.location.href = '/';
+						throw new Error('Authentication error');
+					}
+					if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+					return res.json();
+				})
+				.then((data) => {
+					const container = document.getElementById('weather-container');
+					if (data.length > 0) {
+						const cityData = data[0];
+						container.innerHTML = `
+              <h2>${cityData.city}</h2>
+              <p>Latitude: ${cityData.latitude}</p>
+              <p>Longitude: ${cityData.longitude}</p>
+              <p>Historical Temp (Feb 1-7, 2025 Avg): ${cityData.historical.temperature_2m.slice(-24).reduce((a, b) => a + b) / 24
+							}°C</p>
+            `;
+					} else {
+						container.innerHTML = '<p>No weather data available</p>';
+					}
+				})
+				.catch((err) => {
+					console.error('Weather fetch error:', err);
+					alert('Error fetching city weather: ' + err.message);
+				});
+		}
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>City History</title>
+  <link rel="stylesheet" href="/styles.scss">
+</head>
+<body style="margin-left: 500px;">
+  <h1>City History</h1>
+  <input type="text" id="cityInput" placeholder="Enter city name">
+  <button onclick="fetchCityHistory()">Get History</button>
+  <div id="history-container" style="margin-left: -400px;"></div>
+  <p style="margin-left: 30px;"><a href="/dashboard">Back to Dashboard</a></p>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    let token = urlParams.get('token') || localStorage.getItem('token');
+    if (!token) {
+      alert('Please login first');
+      window.location.href = '/';
+      throw new Error('No token available');
+    }
+    localStorage.setItem('token', token);
+
+
+    function fetchCityHistory() {
+      const city = document.getElementById('cityInput').value.trim();
+      if (!city) {
+        alert('Please enter a city name');
+        return;
+      }
+
+      fetch(`/api/city-history?city=${encodeURIComponent(city)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+        .then((res) => {
+          if (res.status === 400 || res.status === 401) {
+            alert('Session expired or invalid token. Please login again.');
+            window.location.href = '/';
+            throw new Error('Authentication error');
+          }
+          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          const container = document.getElementById('history-container');
+          container.innerHTML = `
+            <h3>${data.city}</h3>
+            <p>${data.history}</p>
+          `;
+        })
+        .catch((err) => {
+          console.error('History fetch error:', err);
+          alert('Error fetching city history: ' + err.message);
+        });
+    }
+  </script>
+</body>
+</html>

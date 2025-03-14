@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="/style.scss">
+</head>
+
+<body>
+    <h1 style="margin-left: 500px;">Weather Dashboard</h1>
+    <div id="navigation" style="margin-top: 20px; margin-left: 900px;">
+        <a href="/favorite-city">Favorite Cities</a> |
+        <a href="/city-notes">City Notes</a> |
+        <a href="/city-history">City History</a> |
+        <a href="/city-weather">City Weather</a>
+    </div>
+    <div id="weather-container"></div>
+    <div style="margin-left: 500px;">
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            let token = urlParams.get('token') || localStorage.getItem('token');
+            if (!token) {
+                alert('Please login first');
+                window.location.href = '/';
+                throw new Error('No token available');
+            }
+            localStorage.setItem('token', token);
+
+
+            // Load weather data
+            fetch('/api/weather', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(res => {
+                    if (res.status === 400 || res.status === 401) {
+                        alert('Session expired or invalid token. Please login again.');
+                        window.location.href = '/';
+                        throw new Error('Authentication error');
+                    }
+                    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('weather-container');
+                    data.forEach(cityData => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                <h2>${cityData.city}</h2>
+                <p>Latitude: ${cityData.latitude}</p>
+                <p>Longitude: ${cityData.longitude}</p>
+                <p>Historical Temp (Feb 1-7, 2025 Avg): ${cityData.historical.temperature_2m.slice(-24).reduce((a, b) => a + b) / 24
+                            }°C</p>
+                <p>History: ${cityData.history.substring(0, 200)}...</p>
+                <hr />
+              `;
+                        container.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    console.error('Weather fetch error:', err);
+                    alert('Error fetching weather data: ' + err.message);
+                });
+        </script>
+    </div>
+    </div>
+</body>
+
+</html>

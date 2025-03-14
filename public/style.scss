@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+#weather-container div,
+#history-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+}
+
+input,
+button {
+    margin: 5px 0;
+    padding: 5px;
+}
+
+#cityInput {
+    width: 200px;
+}
+
+#navigation {
+    margin-top: 20px;
+}
+
+#h1 weatherDashboard {
+    margin-left: 100px;
+}
+
+#navigation a {
+    margin-right: 10px;
+}
+
+#prefList li {
+    margin-top: 15px;
+}
+
+#prefList li button {
+    margin-top: 15px;
+}

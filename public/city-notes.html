@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>City Notes</title>
+    <link rel="stylesheet" href="/styles.scss">
+</head>
+
+<body>
+    <div style="margin-left: 550px;">
+        <h2>City Notes</h2>
+        <div style="margin-bottom: 20px; margin-left: -40px;">
+            <input type="text" id="noteCity" placeholder="City name"> <br />
+        </div>
+        <div style="margin-left: -40px;">
+            <textarea id="noteText" placeholder="Your note">
+        </textarea>
+            <br />
+            <button style="margin-top: 10px; margin-left: 45px;" onclick="addNote()">Add Note</button>
+            <ul id="notesList" style="margin-left: -30px;"></ul>
+
+            <script>
+                const urlParams = new URLSearchParams(window.location.search);
+                let token = urlParams.get('token') || localStorage.getItem('token');
+                if (!token) {
+                    alert('Please login first');
+                    window.location.href = '/';
+                    throw new Error('No token available');
+                }
+                localStorage.setItem('token', token);
+
+
+                // Load notes
+                fetch('/api/notes', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                    .then(res => res.json())
+                    .then(notes => {
+                        const list = document.getElementById('notesList');
+                        notes.forEach(note => {
+                            const li = document.createElement('li');
+                            li.textContent = `${note.city}: ${note.note} (Added: ${note.created_at}) `;
+                            const btn = document.createElement('button');
+                            btn.textContent = 'Delete';
+                            btn.onclick = () => deleteNote(note.id);
+                            li.appendChild(btn);
+                            list.appendChild(li);
+                        });
+                    });
+
+                function addNote() {
+                    const city = document.getElementById('noteCity').value.trim();
+                    const note = document.getElementById('noteText').value.trim();
+                    if (!city || !note) return alert('Enter city and note');
+                    fetch('/api/notes', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ city, note })
+                    })
+                        .then(res => res.text())
+                        .then(() => location.reload());
+                }
+
+                function deleteNote(id) {
+                    fetch('/api/notes', {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id })
+                    })
+                        .then(res => res.text())
+                        .then(() => location.reload());
+                }
+            </script>
+        </div>
+    </div>
+    <p style="margin-left: 30px;"><a href="/dashboard">Back to Dashboard</a></p>
+</body>
+
+</html>

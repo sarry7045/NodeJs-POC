@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "username": "harshu@123.com",
+      "password": "$2b$10$C5uM3xYaxUlw6QHOYmw2/.SSXp4ZCVSN3ANo2Gvjg0fv6u09OjbmO"
+    },
+    {
+      "username": "test@123.com",
+      "password": "$2b$10$y/4hsBBA2phIU7G0.pJYZ.GxVOr50wFzj04igi1M3fib07AeAIhhK"
+    }
+  ]
+}

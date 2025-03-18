@@ -29,3 +29,28 @@ td {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.ReactVirtualized__Grid::-webkit-scrollbar {
+  width: 5px;
+  height: 0px;
+}
+
+.ReactVirtualized__Grid__cell {
+  border-right: 1px solid #e5e7eb;
+}
+
+.ReactVirtualized__Grid__cell > div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

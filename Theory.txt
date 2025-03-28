@@ -3,7 +3,7 @@ Web Socket
 PUG 
 Cloudinary - Cloud Storage Type
 Middleware - If we want to perform any task before any action.
-CORS - It's does'nt Allow any Unknow Port/or Data - Use NPM Package for more customize - Setup
+CORS - It's does'nt Allow any Unknow Port/or Data - Use NPM Package for more customize - Setup - Browser Security Feature
 Multer - Use for Files Upload
 NGINX - Use for Reverse Proxy (One Client Mutiple Servers), Load Balancers (Round Robbin Algorithum), Cookies handle
 MongoDB Aggregation - Suppose we have 100 data set and after some time we need only 50 data set for that situation we can use aggregation Technique

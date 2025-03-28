@@ -1,0 +1,5 @@
+Type Room Name in 1st chat and Enter
+then Go to 2nd Chat and type Message and Type Room same as type on First chat
+then Check the Messages in first chat
+
+Same we can do Reverese

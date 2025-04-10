@@ -1,0 +1,14 @@
+Press a for test all test cases
+
+For Specific one file : npm run test Other
+
+Press w for showing options
+
+Press f for showing only failed cases
+
+
+filename.spec.js
+filename.spec.jsx  
+filename.test.js
+
+__tests__  -  if We Create folder like this then we don't need to give the file name abc.test.js again n again

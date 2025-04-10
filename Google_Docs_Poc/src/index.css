@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes highlight-comment {
+  0% {
+    transform: translateX(20px);
+    background-color: rgb(254 249 195);
+  }
+  100% {
+    transform: translateX(0);
+    background-color: rgb(249 250 251);
+  }
+}
+
+.comment-highlight {
+  animation: highlight-comment 1s ease-out;
+}

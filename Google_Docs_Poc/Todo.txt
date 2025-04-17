@@ -1,11 +1,3 @@
-1) Bug : Still it's changing the Left content when i select any word and comment on it
-
-2) @ Suggestion for all the Inputs
-
-3) Change in JS
-
-4) Change in ANTD
-
-5) Selection in Limited Area
-
-6) Change Iocon put Values  
+1) Bug : Still it's changing the Left content when i select any word and comment on it - LP
+2) Change in JS - LP
+3) Change in ANTD - LP

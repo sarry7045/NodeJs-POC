@@ -16,6 +16,7 @@ export const CommentSection: React.FC = () => {
     deleteReply,
     editComment,
     editReply,
+    setSelectedText,
   } = useStore();
 
   const [newComment, setNewComment] = useState("");
@@ -27,6 +28,9 @@ export const CommentSection: React.FC = () => {
   } | null>(null);
   const [editText, setEditText] = useState("");
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
+  const [showReplyUserSuggestions, setShowReplyUserSuggestions] =
+    useState(false);
+  const [showReplyField, setShowReplyField] = useState(false);
   const [userQuery, setUserQuery] = useState("");
   const commentInputRef = useRef<HTMLInputElement>(null);
   const [activeCommentRef, setActiveCommentRef] =
@@ -48,7 +52,8 @@ export const CommentSection: React.FC = () => {
     }
   }, [activeCommentId]);
 
-  const handleAddComment = () => {
+  const handleAddComment = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     if (!selectedText || !newComment.trim()) return;
 
     addComment({
@@ -62,7 +67,18 @@ export const CommentSection: React.FC = () => {
     setNewComment("");
   };
 
-  const handleAddReply = (commentId: string) => {
+  const handleCancelComment = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    setShowReplyField(false)
+    setSelectedText(null);
+  };
+
+  const handleAddReply = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    commentId: string
+  ) => {
+    // setSelectedText(null);
+    e.stopPropagation();
     const replyText = replyTexts[commentId];
     if (!replyText?.trim()) return;
 
@@ -80,29 +96,46 @@ export const CommentSection: React.FC = () => {
     isReply = false,
     commentId = ""
   ) => {
+    e.stopPropagation();
     const value = e.target.value;
+    const ID = e.target.id;
     if (isReply) {
       setReplyTexts((prev) => ({ ...prev, [commentId]: value }));
     } else {
       setNewComment(value);
     }
 
-    if (value.includes("@")) {
+    if (value.includes("@") && ID === "Comment") {
       const query = value.split("@").pop() || "";
       setUserQuery(query);
       setShowUserSuggestions(true);
     } else {
       setShowUserSuggestions(false);
     }
+
+    if (value.includes("@") && ID === "Reply") {
+      const query = value.split("@").pop() || "";
+      setUserQuery(query);
+      setShowReplyUserSuggestions(true);
+    } else {
+      setShowReplyUserSuggestions(false);
+    }
   };
 
-  const handleUserSelect = (user: User, isReply = false, commentId = "") => {
+  const handleUserSelect = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    user: User,
+    isReply = false,
+    commentId = ""
+  ) => {
+    e.stopPropagation();
     const inputRef = isReply
       ? (document.querySelector(
           `[data-reply-input="${commentId}"]`
         ) as HTMLInputElement)
       : commentInputRef.current;
     const currentText = isReply ? replyTexts[commentId] || "" : newComment;
+    console.log("inputRef", inputRef);
 
     if (inputRef) {
       const cursorPosition = inputRef.selectionStart || 0;
@@ -130,13 +163,16 @@ export const CommentSection: React.FC = () => {
       }
     }
     setShowUserSuggestions(false);
+    setShowReplyUserSuggestions(false);
   };
 
   const startEditing = (
+    e: React.MouseEvent<HTMLButtonElement>,
     type: "comment" | "reply",
     commentId: string,
     replyId?: string
   ) => {
+    e.stopPropagation();
     const text =
       type === "comment"
         ? comments.find((c) => c.id === commentId)?.text
@@ -154,7 +190,8 @@ export const CommentSection: React.FC = () => {
     }
   };
 
-  const saveEdit = () => {
+  const saveEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     if (editingComment) {
       editComment(editingComment, editText);
       setEditingComment(null);
@@ -165,10 +202,16 @@ export const CommentSection: React.FC = () => {
     setEditText("");
   };
 
-  const cancelEdit = () => {
+  const cancelEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setEditingComment(null);
     setEditingReply(null);
     setEditText("");
+  };
+
+  const handleShowReplyField = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setShowReplyField(true);
   };
 
   const groupedComments = comments.reduce(
@@ -188,7 +231,10 @@ export const CommentSection: React.FC = () => {
   console.log("comments", comments);
 
   return (
-    <div className="comment-section w-96 h-screen border-l border-gray-200 bg-white overflow-y-auto">
+    <div
+      className="comment-section w-96 h-screen border-l border-gray-200 bg-white overflow-y-auto"
+      style={{ width: "440px", userSelect: "none" }}
+    >
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-4">Comments</h2>
         {selectedText && (
@@ -202,19 +248,40 @@ export const CommentSection: React.FC = () => {
                 <input
                   ref={commentInputRef}
                   type="text"
+                  data-reply-input={"1"}
                   value={newComment}
                   onChange={(e) => handleInputChange(e)}
-                  placeholder="Add a comment..."
+                  placeholder="Comment or add other with @"
                   className="w-full p-2 border rounded-lg pr-10"
+                  id="Comment"
                 />
-                <button
+                {/* <button
                   onClick={handleAddComment}
                   className="absolute right-2 top-2 text-blue-500"
                 >
                   <Send size={20} />
-                </button>
+                </button> */}
+                <span className="justify-end flex">
+                  <button
+                    className="my-2 rounded-full border border-slate-300 py-1 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-600 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                    type="button"
+                    onClick={(e) => handleCancelComment(e)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={(e) => handleAddComment(e)}
+                    className="my-2 ml-2 rounded-full border border-slate-300 py-1 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-100 hover:text-white hover:bg-slate-800 bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                    type="button"
+                  >
+                    Comment
+                  </button>
+                </span>
                 {showUserSuggestions && (
-                  <div className="absolute bg-white shadow-lg rounded-lg mt-1 w-64 z-50">
+                  <div
+                    className="absolute bg-white shadow-lg rounded-lg mt-1 w-60 z-50"
+                    style={{ marginTop: "-45px" }}
+                  >
                     {users
                       .filter((user) =>
                         user.name
@@ -224,7 +291,10 @@ export const CommentSection: React.FC = () => {
                       .map((user) => (
                         <div
                           key={user.id}
-                          onClick={() => handleUserSelect(user)}
+                          onClick={(e) =>
+                            handleUserSelect(e, user, true, user.id)
+                          }
+                          // onClick={() => alert("Hii")}
                           className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
                         >
                           <img
@@ -253,7 +323,8 @@ export const CommentSection: React.FC = () => {
                     <div
                       key={comment.id}
                       data-comment-container={comment.id}
-                      className="bg-gray-50 rounded-lg p-4 transition-all duration-500"
+                      className="bg-gray-50 rounded-lg p-4 transition-all duration-500 cursor-pointer hover:bg-blue-100"
+                      onClick={(e) => handleShowReplyField(e)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center">
@@ -278,7 +349,16 @@ export const CommentSection: React.FC = () => {
                         </div>
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => startEditing("comment", comment.id)}
+                            title="Mark as Resolved"
+                            className="text-gray-400 hover:text-blue-500"
+                            onClick={() => deleteComment(comment.id)}
+                          >
+                            <Check size={18} className="text-blue-500" />
+                          </button>
+                          <button
+                            onClick={(e) =>
+                              startEditing(e, "comment", comment.id)
+                            }
                             className="text-gray-400 hover:text-blue-500"
                           >
                             <Pencil size={16} />
@@ -305,13 +385,13 @@ export const CommentSection: React.FC = () => {
                               onClick={cancelEdit}
                               className="text-gray-500 hover:text-gray-700"
                             >
-                              <X size={16} />
+                              <X size={17} />
                             </button>
                             <button
                               onClick={saveEdit}
                               className="text-green-500 hover:text-green-700"
                             >
-                              <Check size={16} />
+                              <Check size={17} />
                             </button>
                           </div>
                         </div>
@@ -320,7 +400,7 @@ export const CommentSection: React.FC = () => {
                       )}
                       <div className="mt-3 space-y-3">
                         {comment.replies.map((reply) => (
-                          <div key={reply.id} className="pl-8">
+                          <div key={reply.id} className="pl-8 mt-4">
                             <div className="flex items-start justify-between">
                               <div className="flex items-center">
                                 <img
@@ -348,8 +428,13 @@ export const CommentSection: React.FC = () => {
                               </div>
                               <div className="flex space-x-2">
                                 <button
-                                  onClick={() =>
-                                    startEditing("reply", comment.id, reply.id)
+                                  onClick={(e) =>
+                                    startEditing(
+                                      e,
+                                      "reply",
+                                      comment.id,
+                                      reply.id
+                                    )
                                   }
                                   className="text-gray-400 hover:text-blue-500"
                                 >
@@ -380,13 +465,13 @@ export const CommentSection: React.FC = () => {
                                     onClick={cancelEdit}
                                     className="text-gray-500 hover:text-gray-700"
                                   >
-                                    <X size={14} />
+                                    <X size={16} />
                                   </button>
                                   <button
                                     onClick={saveEdit}
                                     className="text-green-500 hover:text-green-700"
                                   >
-                                    <Check size={14} />
+                                    <Check size={16} />
                                   </button>
                                 </div>
                               </div>
@@ -395,52 +480,76 @@ export const CommentSection: React.FC = () => {
                             )}
                           </div>
                         ))}
-                        <div className="pl-8 mt-2">
-                          <div className="flex items-center space-x-2 relative">
-                            <input
-                              type="text"
-                              data-reply-input={comment.id}
-                              value={replyTexts[comment.id] || ""}
-                              onChange={(e) =>
-                                handleInputChange(e, true, comment.id)
-                              }
-                              placeholder="Reply..."
-                              className="flex-1 p-1.5 text-sm border rounded"
-                            />
-                            {showUserSuggestions && (
-                              <div className="absolute bottom-full left-0 bg-white shadow-lg rounded-lg mb-1 w-64 z-50">
-                                {users
-                                  .filter((user) =>
-                                    user.name
-                                      .toLowerCase()
-                                      .includes(userQuery.toLowerCase())
-                                  )
-                                  .map((user) => (
-                                    <div
-                                      key={user.id}
-                                      onClick={() =>
-                                        handleUserSelect(user, true, comment.id)
-                                      }
-                                      className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.name}
-                                        className="w-6 h-6 rounded-full mr-2"
-                                      />
-                                      <span>{user.name}</span>
-                                    </div>
-                                  ))}
-                              </div>
-                            )}
-                            <button
-                              onClick={() => handleAddReply(comment.id)}
-                              className="text-blue-500"
-                            >
-                              <Reply size={16} />
-                            </button>
+                        {showReplyField && (
+                          <div className="pl-8 mt-2">
+                            <div className="flex items-center space-x-2 relative">
+                              <input
+                                type="text"
+                                data-reply-input={comment.id}
+                                value={replyTexts[comment.id] || ""}
+                                onChange={(e) =>
+                                  handleInputChange(e, true, comment.id)
+                                }
+                                placeholder="Reply or add others with @"
+                                className="flex-1 p-1.5 text-sm border rounded"
+                                id="Reply"
+                              />
+                              {showReplyUserSuggestions && (
+                                <div className="absolute bottom-full left-0 bg-white shadow-lg rounded-lg mb-1 w-60 z-50">
+                                  {users
+                                    .filter((user) =>
+                                      user.name
+                                        .toLowerCase()
+                                        .includes(userQuery.toLowerCase())
+                                    )
+                                    .map((user) => (
+                                      <div
+                                        key={user.id}
+                                        onClick={(e) =>
+                                          handleUserSelect(
+                                            e,
+                                            user,
+                                            true,
+                                            comment.id
+                                          )
+                                        }
+                                        className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                                      >
+                                        <img
+                                          src={user.avatar}
+                                          alt={user.name}
+                                          className="w-6 h-6 rounded-full mr-2"
+                                        />
+                                        <span>{user.name}</span>
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                              {/* <button
+                                onClick={() => handleAddReply(comment.id)}
+                                className="text-blue-500"
+                              >
+                                <Reply size={16} />
+                              </button> */}
+                            </div>
+                            <span className="justify-end flex">
+                              <button
+                                className="my-2 rounded-full border border-slate-300 py-1 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-600 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                type="button"
+                                onClick={(e) => handleCancelComment(e)}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={(e) => handleAddReply(e, comment.id)}
+                                className="my-2 ml-2 rounded-full border border-slate-300 py-1 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-100 hover:text-white hover:bg-slate-800 bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                type="button"
+                              >
+                                Reply
+                              </button>
+                            </span>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   ))}

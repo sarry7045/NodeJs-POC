@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
-import { Trash2, Reply, Send, Pencil, X, Check } from "lucide-react";
-import { useStore } from "../store";
-import { User } from "../types";
+import { Trash2, Pencil, X, Check } from "lucide-react";
+import { useStore } from "../Store";
 
-export const CommentSection: React.FC = () => {
+export const CommentSection = () => {
   const {
     comments,
     users,
@@ -20,27 +19,23 @@ export const CommentSection: React.FC = () => {
   } = useStore();
 
   const [newComment, setNewComment] = useState("");
-  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
-  const [editingComment, setEditingComment] = useState<string | null>(null);
-  const [editingReply, setEditingReply] = useState<{
-    commentId: string;
-    replyId: string;
-  } | null>(null);
+  const [replyTexts, setReplyTexts] = useState({});
+  const [editingComment, setEditingComment] = useState(null);
+  const [editingReply, setEditingReply] = useState(null);
   const [editText, setEditText] = useState("");
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
   const [showReplyUserSuggestions, setShowReplyUserSuggestions] =
     useState(false);
   const [showReplyField, setShowReplyField] = useState(false);
   const [userQuery, setUserQuery] = useState("");
-  const commentInputRef = useRef<HTMLInputElement>(null);
-  const [activeCommentRef, setActiveCommentRef] =
-    useState<HTMLDivElement | null>(null);
+  const commentInputRef = useRef(null);
+  const [activeCommentRef, setActiveCommentRef] = useState(null);
 
   useEffect(() => {
     if (activeCommentId) {
       const commentElement = document.querySelector(
         `[data-comment-container="${activeCommentId}"]`
-      ) as HTMLDivElement;
+      );
       if (commentElement) {
         setActiveCommentRef(commentElement);
         commentElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -52,11 +47,8 @@ export const CommentSection: React.FC = () => {
     }
   }, [activeCommentId]);
 
-  const handleAddComment = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddComment = (e) => {
     e.stopPropagation();
-    if(newComment.length < 1 || selectedText && selectedText?.text.length < 1) {
-      alert("Make sure you selected some text and adding some comment on that.")
-    }
     if (!selectedText || !newComment.trim()) return;
 
     addComment({
@@ -70,18 +62,13 @@ export const CommentSection: React.FC = () => {
     setNewComment("");
   };
 
-  const handleCancelComment = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCancelComment = (e) => {
     e.stopPropagation();
-    setShowReplyField(false)
+    setShowReplyField(false);
     setSelectedText(null);
-    setNewComment("")
   };
 
-  const handleAddReply = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    commentId: string
-  ) => {
-    // setSelectedText(null);
+  const handleAddReply = (e, commentId) => {
     e.stopPropagation();
     const replyText = replyTexts[commentId];
     if (!replyText?.trim()) return;
@@ -95,11 +82,7 @@ export const CommentSection: React.FC = () => {
     setReplyTexts((prev) => ({ ...prev, [commentId]: "" }));
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    isReply = false,
-    commentId = ""
-  ) => {
+  const handleInputChange = (e, isReply = false, commentId = "") => {
     e.stopPropagation();
     const value = e.target.value;
     const ID = e.target.id;
@@ -109,13 +92,13 @@ export const CommentSection: React.FC = () => {
       setNewComment(value);
     }
 
-    // if (value.includes("@") && ID === "Comment") {
-    //   const query = value.split("@").pop() || "";
-    //   setUserQuery(query);
-    //   setShowUserSuggestions(true);
-    // } else {
-    //   setShowUserSuggestions(false);
-    // }
+    if (value.includes("@") && ID === "Comment") {
+      const query = value.split("@").pop() || "";
+      setUserQuery(query);
+      setShowUserSuggestions(true);
+    } else {
+      setShowUserSuggestions(false);
+    }
 
     if (value.includes("@") && ID === "Reply") {
       const query = value.split("@").pop() || "";
@@ -126,20 +109,12 @@ export const CommentSection: React.FC = () => {
     }
   };
 
-  const handleUserSelect = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    user: User,
-    isReply = false,
-    commentId = ""
-  ) => {
+  const handleUserSelect = (e, user, isReply = false, commentId = "") => {
     e.stopPropagation();
     const inputRef = isReply
-      ? (document.querySelector(
-          `[data-reply-input="${commentId}"]`
-        ) as HTMLInputElement)
+      ? document.querySelector(`[data-reply-input="${commentId}"]`)
       : commentInputRef.current;
     const currentText = isReply ? replyTexts[commentId] || "" : newComment;
-    console.log("inputRef", inputRef);
 
     if (inputRef) {
       const cursorPosition = inputRef.selectionStart || 0;
@@ -170,12 +145,7 @@ export const CommentSection: React.FC = () => {
     setShowReplyUserSuggestions(false);
   };
 
-  const startEditing = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    type: "comment" | "reply",
-    commentId: string,
-    replyId?: string
-  ) => {
+  const startEditing = (e, type, commentId, replyId) => {
     e.stopPropagation();
     const text =
       type === "comment"
@@ -194,7 +164,7 @@ export const CommentSection: React.FC = () => {
     }
   };
 
-  const saveEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const saveEdit = (e) => {
     e.stopPropagation();
     if (editingComment) {
       editComment(editingComment, editText);
@@ -206,41 +176,26 @@ export const CommentSection: React.FC = () => {
     setEditText("");
   };
 
-  const cancelEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const cancelEdit = (e) => {
     e.stopPropagation();
     setEditingComment(null);
     setEditingReply(null);
     setEditText("");
   };
 
-  const handleShowReplyField = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleShowReplyField = (e) => {
     e.stopPropagation();
     setShowReplyField(true);
   };
 
-  const groupedComments = comments.reduce(
-    (acc, comment) => {
-      const key = comment.selection.text;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(comment);
-      return acc;
-    },
-    {} as Record<string, typeof comments>
-  );
-
-  const handleMarkasResolved = (commentId: string, commentText:string) =>{
-   const Result = confirm(`Are you sure want to Resolve this query ? "${commentText.toUpperCase()}"`)
-   if(Result){
-    deleteComment(commentId)
-   }
-  }
-
-  console.log("groupedComments", groupedComments);
-  console.log("activeCommentId", activeCommentId);
-  console.log("comments", comments);
-  console.log("selectedText", selectedText);
+  const groupedComments = comments.reduce((acc, comment) => {
+    const key = comment.selection.text;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(comment);
+    return acc;
+  }, {});
 
   return (
     <div
@@ -249,11 +204,11 @@ export const CommentSection: React.FC = () => {
     >
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-4">Comments</h2>
-        
+        {selectedText && (
           <div className="mb-4">
             <div className="bg-yellow-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">Selected text: <span className="text-sm font-medium text-black">{selectedText?.text}</span></p>
-              {/* <p className="text-sm font-medium">{selectedText?.text}</p> */}
+              <p className="text-sm text-gray-600">Selected text:</p>
+              <p className="text-sm font-medium">{selectedText.text}</p>
             </div>
             <div className="mt-3">
               <div className="relative">
@@ -263,16 +218,10 @@ export const CommentSection: React.FC = () => {
                   data-reply-input={"1"}
                   value={newComment}
                   onChange={(e) => handleInputChange(e)}
-                  placeholder="Select and Comment Your Query.."
+                  placeholder="Comment or add other with @"
                   className="w-full p-2 border rounded-lg pr-10"
                   id="Comment"
                 />
-                {/* <button
-                  onClick={handleAddComment}
-                  className="absolute right-2 top-2 text-blue-500"
-                >
-                  <Send size={20} />
-                </button> */}
                 <span className="justify-end flex">
                   <button
                     className="my-2 rounded-full border border-slate-300 py-1 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-600 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
@@ -306,7 +255,6 @@ export const CommentSection: React.FC = () => {
                           onClick={(e) =>
                             handleUserSelect(e, user, true, user.id)
                           }
-                          // onClick={() => alert("Hii")}
                           className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
                         >
                           <img
@@ -322,7 +270,7 @@ export const CommentSection: React.FC = () => {
               </div>
             </div>
           </div>
-      
+        )}
         <div className="space-y-6">
           {Object.entries(groupedComments).map(
             ([selectionText, commentsGroup]) => (
@@ -363,7 +311,7 @@ export const CommentSection: React.FC = () => {
                           <button
                             title="Mark as Resolved"
                             className="text-gray-400 hover:text-blue-500"
-                            onClick={() => handleMarkasResolved(comment.id, selectionText)}
+                            onClick={() => deleteComment(comment.id)}
                           >
                             <Check size={18} className="text-blue-500" />
                           </button>
@@ -537,12 +485,6 @@ export const CommentSection: React.FC = () => {
                                     ))}
                                 </div>
                               )}
-                              {/* <button
-                                onClick={() => handleAddReply(comment.id)}
-                                className="text-blue-500"
-                              >
-                                <Reply size={16} />
-                              </button> */}
                             </div>
                             <span className="justify-end flex">
                               <button

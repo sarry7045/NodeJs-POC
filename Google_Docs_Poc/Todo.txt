@@ -1,3 +1,1 @@
 1) Bug : Still it's changing the Left content when i select any word and comment on it - LP
-2) Change in JS - LP
-3) Change in ANTD - LP

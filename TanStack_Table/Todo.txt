@@ -1,0 +1,11 @@
+Grouping feature like FirstName, LastName and Age is in One Group and Salary, Email, City, Department is in Another Group - D
+Column Move Dnd - We can move column like drag and drop - D 
+Column / Row Freeze - D
+Virualized - LP
+
+
+Pagination Per Page is not Working
+
+Column Freeze
+Don't Move to Others of Fullname Column
+1 to 5 Then Total of It

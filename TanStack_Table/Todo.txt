@@ -4,8 +4,8 @@ Column / Row Freeze - D
 Virualized - LP
 
 
-Pagination Per Page is not Working
+Pagination Per Page is not Working in App3
 
-Column Freeze
+Column Freeze - Some bugs in that
 Don't Move to Others of Fullname Column
 1 to 5 Then Total of It

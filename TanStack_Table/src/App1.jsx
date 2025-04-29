@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -272,8 +272,6 @@ const App1 = () => {
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Advanced Table with TanStack</h1>
-
-      {/* Global Search */}
       <div className="mb-4">
         <input
           type="text"
@@ -283,8 +281,6 @@ const App1 = () => {
           className="p-2 border rounded w-full max-w-md"
         />
       </div>
-
-      {/* Column Visibility Controls - Grouped */}
       <div className="mb-4 p-2 border rounded">
         <h2 className="font-semibold mb-2">Visible Columns</h2>
         {table

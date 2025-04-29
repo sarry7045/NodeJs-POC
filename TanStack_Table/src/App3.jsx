@@ -93,12 +93,14 @@ const App3 = () => {
     { id: "visits", header: "Visits", group: "others" },
     { id: "status", header: "Status", group: "others" },
     { id: "progress", header: "Progress", group: "others" },
+    { id: "progress", header: "Progress", group: "others" },
+    { id: "progress", header: "Progress", group: "others" },
+    { id: "progress", header: "Progress", group: "others" },
   ];
 
   // Filter data based on global and column filters
   const filterData = (dataToFilter) => {
     return dataToFilter.filter((row) => {
-      // Apply global filter
       if (globalFilter) {
         const matchesGlobal = Object.values(row).some((value) =>
           String(value).toLowerCase().includes(globalFilter.toLowerCase())
@@ -142,7 +144,7 @@ const App3 = () => {
     let result = filterData(data);
     result = sortData(result);
     setDisplayData(result);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [data, globalFilter, filters, sortConfig]);
 
   // Get paginated data
@@ -269,10 +271,7 @@ const App3 = () => {
   return (
     <div className="p-6 max-w-full bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Advanced Table</h1>
-
-      {/* Control panel */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        {/* Global search */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <svg
@@ -299,8 +298,6 @@ const App3 = () => {
             onChange={(e) => setGlobalFilter(e.target.value)}
           />
         </div>
-
-        {/* Column visibility dropdown */}
         <div className="relative">
           <button
             className="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2.5 inline-flex items-center"
@@ -326,7 +323,7 @@ const App3 = () => {
                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
               ></path>
             </svg>
-            Toggle Columns
+            Advance Filters
           </button>
 
           {columnsMenuOpen && (
@@ -365,20 +362,15 @@ const App3 = () => {
           )}
         </div>
       </div>
-
-      {/* Table container with shadow and rounded corners */}
       <div className="overflow-x-auto shadow-md sm:rounded-lg mb-6 border border-gray-200">
         <table className="w-full text-sm text-left text-gray-500">
-          {/* Column Group Header */}
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              {/* Add pin column header */}
               <th className="px-6 py-3 bg-gray-50" rowSpan="2">
                 Pin
               </th>
 
               {columnGroups.map((group) => {
-                // Calculate column span - only count visible columns
                 const visibleColumnsInGroup = group.columns.filter(
                   (colId) => visibleColumns[colId]
                 );
@@ -415,7 +407,9 @@ const App3 = () => {
                       onDrop={(e) => handleDrop(e, column.id)}
                       onDragOver={handleDragOver}
                       onClick={() => handleSort(column.id)}
-                      style={{borderLeft: index === 0 ? '1px solid #E8E9EB' : ''}}
+                      style={{
+                        borderLeft: index === 0 ? "1px solid #E8E9EB" : "",
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         {column.header}
@@ -449,18 +443,17 @@ const App3 = () => {
                 })}
             </tr>
 
-            {/* Filter row */}
             <tr>
-              {/* Pin column filter - empty cell */}
               <th className="px-6 py-3 bg-gray-50"></th>
-
               {columnOrder
                 .filter((columnId) => visibleColumns[columnId])
                 .map((columnId, index) => (
                   <th
                     key={`filter-${columnId}`}
                     className="px-3 py-2 bg-gray-50"
-                    style={{borderLeft: index === 0 ? '1px solid #E8E9EB' : ''}}
+                    style={{
+                      borderLeft: index === 0 ? "1px solid #E8E9EB" : "",
+                    }}
                   >
                     <input
                       type="text"
@@ -469,7 +462,7 @@ const App3 = () => {
                         handleFilterChange(columnId, e.target.value)
                       }
                       placeholder={`Filter ${columnId}...`}
-                      style={{fontWeight:500}}
+                      style={{ fontWeight: 500 }}
                       className="w-full p-1 text-sm text-gray-600 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 size-8"
                     />
                   </th>
@@ -485,7 +478,6 @@ const App3 = () => {
                   key={`pinned-${row.id}`}
                   className="bg-blue-50 border-b-2 border-blue-200"
                 >
-                  {/* Pin/Unpin button */}
                   <td className="p-2 border border-gray-300 text-center">
                     <button
                       onClick={() => togglePinRow(row.id)}
@@ -515,12 +507,9 @@ const App3 = () => {
               ))}
             </thead>
           )}
-
-          {/* Regular table body */}
           <tbody>
             {paginatedData.map((row) => (
               <tr key={row.id} className="hover:bg-gray-50">
-                {/* Pin/Unpin button */}
                 <td className="p-2 border border-gray-300 text-center">
                   <button
                     onClick={() => togglePinRow(row.id)}
@@ -632,8 +621,8 @@ const App3 = () => {
           />
           <span>
             Page{" "}
-            <strong>       
-            {currentPage} of {totalPages || 1}
+            <strong>
+              {currentPage} of {totalPages || 1}
             </strong>
           </span>
         </Space>
